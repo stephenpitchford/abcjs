@@ -4305,6 +4305,9 @@ var parseDirective = {};
       case "flatbeams":
         tune.formatting.flatbeams = true;
         break;
+      case "alignbeams":
+        tune.formatting.alignbeams = true;
+        break;
       case "jazzchords":
         tune.formatting.jazzchords = true;
         break;
@@ -18338,7 +18341,8 @@ var AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, option
   this.getTextSize = getTextSize;
   this.tuneNumber = tuneNumber;
   this.isBagpipes = options.bagpipes;
-  this.flatBeams = options.flatbeams;
+  this.flatBeams = options.flatbeams || options.alignbeams;
+  this.alignBeams = options.alignbeams;
   this.graceSlurs = options.graceSlurs;
   this.percmap = options.percmap;
   this.initialClef = options.initialClef;
@@ -18684,7 +18688,7 @@ function setAveragePitch(elem) {
 }
 AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elems) {
   var abselemset = [];
-  var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0]);
+  var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0], this.alignBeams);
   if (hint) beamelem.setHint();
   for (var i = 0; i < elems.length; i++) {
     // Do a first pass to figure out the stem direction before creating the notes, so that staccatos and other decorations can be placed correctly.
@@ -20645,10 +20649,11 @@ module.exports = AbsoluteElement;
 //
 // Setup phase
 //
-var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
+var BeamElem = function BeamElem(stemHeight, type, flat, firstElement, alignbeams) {
   // type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
   this.type = "BeamElem";
   this.isflat = !!flat;
+  this.alignbeams = !!alignbeams;
   this.isgrace = !!(type && type === "grace");
   this.forceup = !!(this.isgrace || type && type === "up");
   this.forcedown = !!(type && type === "down");
@@ -25192,6 +25197,7 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
   this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
     bagpipes: abcTune.formatting.bagpipes,
     flatbeams: abcTune.formatting.flatbeams,
+    alignbeams: abcTune.formatting.alignbeams,
     graceSlurs: abcTune.formatting.graceSlurs !== false,
     // undefined is the default, which is true
     percmap: abcTune.formatting.percmap,
@@ -27291,6 +27297,9 @@ var layoutVoice = function layoutVoice(voice) {
       }
     }
   }
+
+  // If alignbeams is set, align all flat beams in this voice to the same vertical position.
+  alignBeams(voice.beams);
   voice.staff.specialY.chordLines = setLaneForChord(voice.children);
 
   // Now we can layout the triplets
@@ -27404,6 +27413,66 @@ function setLane(absElems, numLanesAbove, numLanesBelow) {
 function yAtNote(element, beam) {
   beam = beam.beams[0];
   return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
+}
+function alignBeams(beams) {
+  // Collect all beam groups that have alignbeams set, separated by stem direction.
+  var stemsUpBeams = [];
+  var stemsDownBeams = [];
+  for (var i = 0; i < beams.length; i++) {
+    var beam = beams[i];
+    if (beam.type === 'BeamElem' && beam.alignbeams && beam.beams.length > 0) {
+      if (beam.stemsUp) stemsUpBeams.push(beam);else stemsDownBeams.push(beam);
+    }
+  }
+
+  // For stems-up beams, align to the highest beam position (largest Y value).
+  if (stemsUpBeams.length > 1) {
+    var targetY = stemsUpBeams[0].beams[0].startY;
+    for (i = 1; i < stemsUpBeams.length; i++) {
+      if (stemsUpBeams[i].beams[0].startY > targetY) targetY = stemsUpBeams[i].beams[0].startY;
+    }
+    for (i = 0; i < stemsUpBeams.length; i++) {
+      adjustBeamPosition(stemsUpBeams[i], targetY);
+    }
+  }
+
+  // For stems-down beams, align to the lowest beam position (smallest Y value).
+  if (stemsDownBeams.length > 1) {
+    var targetYDown = stemsDownBeams[0].beams[0].startY;
+    for (i = 1; i < stemsDownBeams.length; i++) {
+      if (stemsDownBeams[i].beams[0].startY < targetYDown) targetYDown = stemsDownBeams[i].beams[0].startY;
+    }
+    for (i = 0; i < stemsDownBeams.length; i++) {
+      adjustBeamPosition(stemsDownBeams[i], targetYDown);
+    }
+  }
+}
+function adjustBeamPosition(beam, targetY) {
+  var mainBeam = beam.beams[0];
+  var delta = targetY - mainBeam.startY;
+  if (delta === 0) return;
+
+  // Adjust the main beam and all additional beams (16th, 32nd, etc.)
+  for (var b = 0; b < beam.beams.length; b++) {
+    beam.beams[b].startY += delta;
+    beam.beams[b].endY += delta;
+  }
+
+  // Adjust stem endpoints (pitch2) for all notes in this beam group.
+  for (var i = 0; i < beam.elems.length; i++) {
+    var elem = beam.elems[i];
+    if (elem.abcelem.rest) continue;
+    // Find the stem among the element's children (or right-attached elements).
+    var children = elem.children;
+    for (var j = 0; j < children.length; j++) {
+      if (children[j].type === 'stem') {
+        children[j].pitch2 += delta;
+        // Update top/bottom bounds.
+        if (children[j].pitch2 > children[j].top) children[j].top = children[j].pitch2;
+        if (children[j].pitch2 < children[j].bottom) children[j].bottom = children[j].pitch2;
+      }
+    }
+  }
 }
 module.exports = layoutVoice;
 

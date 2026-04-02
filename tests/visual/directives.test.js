@@ -45,6 +45,75 @@ describe("Directives", function() {
 		"c4|\n" +
 		"d4|\n"
 
+	it("alignbeams", function() {
+		var abc = "%%alignbeams\nM:4/4\nL:1/8\nK:C\nCEGc cGEC|\n";
+		var visualObj = abcjs.renderAbc("paper", abc);
+		chai.assert.equal(visualObj[0].formatting.alignbeams, true);
+	})
+
+	it("alignbeams-positions", function() {
+		// Two beam groups with notes at very different pitches
+		var abc = "%%alignbeams\nM:4/4\nL:1/8\nK:C\nCDEF|cdef|\n";
+		var visualObj = abcjs.renderAbc("paper", abc);
+		var beams = visualObj[0].lines[0].staffGroup.voices[0].beams;
+		var beamElems = [];
+		for (var i = 0; i < beams.length; i++) {
+			if (beams[i].type === 'BeamElem')
+				beamElems.push(beams[i]);
+		}
+		chai.assert.isAbove(beamElems.length, 1, "should have multiple beam groups");
+		// All stems-up beams should have the same startY
+		var firstY = beamElems[0].beams[0].startY;
+		for (var i = 1; i < beamElems.length; i++) {
+			chai.assert.equal(beamElems[i].beams[0].startY, firstY,
+				"beam group " + i + " should be aligned with beam group 0");
+		}
+	})
+
+	it("alignbeams-implies-flat", function() {
+		var abc = "%%alignbeams\nM:4/4\nL:1/8\nK:C\nCEGc|\n";
+		var visualObj = abcjs.renderAbc("paper", abc);
+		var beams = visualObj[0].lines[0].staffGroup.voices[0].beams;
+		for (var i = 0; i < beams.length; i++) {
+			if (beams[i].type === 'BeamElem') {
+				var b = beams[i].beams[0];
+				chai.assert.equal(b.startY, b.endY, "beam should be flat");
+			}
+		}
+	})
+
+	it("alignbeams-off-by-default", function() {
+		var abc = "%%flatbeams\nM:4/4\nL:1/8\nK:C\nCDEF|cdef|\n";
+		var visualObj = abcjs.renderAbc("paper", abc);
+		var beams = visualObj[0].lines[0].staffGroup.voices[0].beams;
+		var beamElems = [];
+		for (var i = 0; i < beams.length; i++) {
+			if (beams[i].type === 'BeamElem')
+				beamElems.push(beams[i]);
+		}
+		// With just flatbeams (no align), beam groups should be at different heights
+		chai.assert.notEqual(beamElems[0].beams[0].startY, beamElems[1].beams[0].startY,
+			"without alignbeams, beam groups should not be aligned");
+	})
+
+	it("alignbeams-stems-down", function() {
+		var abc = "%%alignbeams\nM:4/4\nL:1/8\nK:C\ncdef|CDEF|\n";
+		var visualObj = abcjs.renderAbc("paper", abc);
+		var beams = visualObj[0].lines[0].staffGroup.voices[0].beams;
+		var downBeams = [];
+		for (var i = 0; i < beams.length; i++) {
+			if (beams[i].type === 'BeamElem' && !beams[i].stemsUp)
+				downBeams.push(beams[i]);
+		}
+		if (downBeams.length > 1) {
+			var firstY = downBeams[0].beams[0].startY;
+			for (var i = 1; i < downBeams.length; i++) {
+				chai.assert.equal(downBeams[i].beams[0].startY, firstY,
+					"stems-down beams should also be aligned");
+			}
+		}
+	})
+
 	it("max-staves", function() {
 		var visualObj = abcjs.renderAbc("paper",abcMaxStaves)
 		chai.assert.equal(visualObj[0].lines.length, 5, "Max Staves");

@@ -48,7 +48,8 @@ var AbstractEngraver = function (getTextSize, tuneNumber, options) {
 	this.getTextSize = getTextSize;
 	this.tuneNumber = tuneNumber;
 	this.isBagpipes = options.bagpipes;
-	this.flatBeams = options.flatbeams;
+	this.flatBeams = options.flatbeams || options.alignbeams;
+	this.alignBeams = options.alignbeams;
 	this.graceSlurs = options.graceSlurs;
 	this.percmap = options.percmap;
 	this.initialClef = options.initialClef
@@ -402,7 +403,7 @@ function setAveragePitch(elem) {
 AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elems) {
 	var abselemset = [];
 
-	var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0]);
+	var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0], this.alignBeams);
 	if (hint) beamelem.setHint();
 	for (var i = 0; i < elems.length; i++) {
 		// Do a first pass to figure out the stem direction before creating the notes, so that staccatos and other decorations can be placed correctly.
