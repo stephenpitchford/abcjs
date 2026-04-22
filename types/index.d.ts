@@ -470,6 +470,7 @@ declare module 'abcjs' {
 		dynalign?: boolean;
 		exprabove?: boolean;
 		exprbelow?: boolean;
+		alignbeams?: boolean;
 		flatbeams?: boolean;
 		footer?: string;
 		freegchord?: boolean;

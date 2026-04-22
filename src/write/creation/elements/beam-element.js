@@ -15,10 +15,12 @@
 //
 // Setup phase
 //
-var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
+var BeamElem = function BeamElem(stemHeight, type, flat, firstElement, opts) {
 	// type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
+	opts = opts || {};
 	this.type = "BeamElem";
 	this.isflat = !!flat;
+	this.alignbeams = !!opts.alignbeams;
 	this.isgrace = !!(type && type === "grace");
 	this.forceup = !!(this.isgrace || (type && type === "up"));
 	this.forcedown = !!(type && type === "down");
