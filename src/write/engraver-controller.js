@@ -194,6 +194,7 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 	this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
 		bagpipes: abcTune.formatting.bagpipes,
 		flatbeams: abcTune.formatting.flatbeams,
+		alignbeams: abcTune.formatting.alignbeams,
 		graceSlurs: abcTune.formatting.graceSlurs !== false, // undefined is the default, which is true
 		percmap: abcTune.formatting.percmap,
 		initialClef: this.initialClef,

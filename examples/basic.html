@@ -10,18 +10,32 @@
 	<title>abcjs: Basic Demo</title>
 	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 	<script type="text/javascript">
-		var abc = "T: Cooley's\n" +
-			"M: 4/4\n" +
-			"L: 1/8\n" +
-			"R: reel\n" +
-			"K: Emin\n" +
-			"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
-			"EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\n" +
-			"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
-			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
+		var abc = `X:1
+K:Hp
+L:1/8
+Q:1/4=90
+T:The Merry Mac's
+R:Hornpipe
+C:Gordon Walker
+S:Celtic Fringe, November 2003
+M:2/4
+%%flatbeams
+%%alignbeams
+|: {g}d3/4A/4|{g}d3/4f/4a3/4A/4 {g}c3/4e/4{a}g3/4A/4 |{gBeBG}B{e}A {g}A3/4d/4{g}c3/4d/4 |{gBd}B3/4A/4{gBeBG}B {g}d3/4A/4{gdedc}d | [2 of 2a3/4f/4{g}e3/4d/4 {gef}ea3/4A/4 |
+{g}d3/4f/4a3/4A/4 {g}c3/4e/4{a}g3/4A/4 |{gBeBG}B{e}A {g}A3/4d/4{g}c3/4d/4 |{gBd}B3/4A/4{g}d3/4f/4 a3/4A/4{g}c3/4e/4 |{a}g3/4A/4{gcecG}c {gdedc}d :|
+|: {g}d3/4A/4|{gBd}B3/4A/4{GAG}A {a}g3/4e/4{gcd}c3/4A/4 |{g}d3/4A/4{gdedc}d a3/4f/4{g}d3/4A/4 |{gBd}B3/4A/4{gBeBG}B {g}d3/4A/4{gdedc}d |a3/4f/4{g}e3/4d/4 {gef}e [1 {g}d3/4A/4 |
+{gBd}B3/4A/4{GAG}A {a}g3/4e/4{gcd}c3/4A/4 |{g}d3/4A/4{gdedc}d a3/4f/4{g}d3/4A/4 |{gBd}B3/4A/4{g}d3/4f/4 a3/4A/4{g}c3/4e/4 |{a}g3/4A/4{gcecG}c {gdedc}d :|
+[| {g}d3/4B/4|{gAGAG}A{g}d3/4A/4 {gBd}B3/4A/4{g}d3/4A/4 |{gBeBG}B{e}A {GAG}A{g}d3/4e/4 |{g}f{g}d3/4f/4 {e}f3/4A/4a3/4f/4 |a3/4f/4{g}e3/4d/4 {gef}e{g}d3/4B/4 |
+{gAGAG}A{g}d3/4A/4 {gBd}B3/4A/4{g}d3/4A/4 |{gBeBG}B{e}A {g}A3/4d/4{g}c3/4d/4 |{gBd}B3/4A/4{g}d3/4f/4 a3/4A/4{g}c3/4e/4 |{a}g3/4A/4{gcecG}c {gdedc}d{g}d3/4B/4 |
+{gAGAG}A{g}d3/4A/4 {gBd}B3/4A/4{g}d3/4A/4 |{gBeBG}B{e}A {GAG}A{g}d3/4e/4 |{gfe}f{g}d3/4f/4 {e}f3/4A/4a3/4f/4 |a3/4f/4{g}e3/4d/4 {gef}e{g}d3/4B/4 |
+{gAGAG}A{g}d3/4A/4 {gBd}B3/4A/4{g}d3/4A/4 |{gBeBG}B{e}A {g}A3/4d/4{g}c3/4d/4 |{gBd}B3/4A/4{g}d3/4f/4 a3/4A/4{g}c3/4e/4 |{a}g3/4A/4{gcecG}c {g}d3/4e/4{g}f3/4g/4  |]
+|: {ag}ad3/4a/4 {g}a3/4c/4(3a/2{g}a/2 {g}a/2(3|B3/4a/2{g}a3/4 B/4{gAGAG}A{g}A3/4 d/4|{gBd}B3/4A/4{gBeBG}B {g}d3/4A/4{gdedc}d |a3/4f/4{g}e3/4d/4 {gef}e3/4A/4{g}(3e/2f/2 g/2(3|
+{ag}ad3/4a/4 {g}a3/4c/4(3a/2{g}a/2 {g}a/2(3|B3/4a/2{g}a3/4 B/4{gAGAG}A{g}A3/4 d/4|{gBd}B3/4A/4{g}d3/4f/4 a3/4A/4{g}c3/4e/4 |{a}g3/4A/4{gcecG}c  [1 {g}d3/4e/4{g}f3/4g/4  [2 of {gdedc}d :|`;
 
 		function load() {
-			ABCJS.renderAbc("paper", abc);
+			ABCJS.renderAbc("paper", abc, {
+			scale: 0.2
+			});
 		}
 
 	</script>

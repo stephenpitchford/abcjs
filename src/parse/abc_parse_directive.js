@@ -788,6 +788,7 @@ var parseDirective = {};
 			//					titleformat: { type: "string", optional: true },
 			case "bagpipes":tune.formatting.bagpipes = true;break;
 			case "flatbeams":tune.formatting.flatbeams = true;break;
+			case "alignbeams":tune.formatting.alignbeams = true;break;
 			case "jazzchords":tune.formatting.jazzchords = true;break;
 			case "accentAbove":tune.formatting.accentAbove = true;break;
 			case "germanAlphabet":tune.formatting.germanAlphabet = true;break;

@@ -25,7 +25,7 @@ var layoutBeam = function (beam) {
 		beam.addBeam(beams[i]);
 
 	// Now that the main beam is defined, we know how tall the stems should be, so create them and attach them to the original notes.
-	createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote);
+	beam.createdStems = createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote);
 };
 
 var getDurlog = function (duration) {
@@ -105,6 +105,7 @@ function calcYPos(average, numElements, stemHeight, asc, firstAveragePitch, last
 }
 
 function createStems(elems, asc, beam, dy, mainNote) {
+	var stems = [];
 	for (var i = 0; i < elems.length; i++) {
 		var elem = elems[i];
 		if (elem.abcelem.rest)
@@ -139,8 +140,9 @@ function createStems(elems, asc, beam, dy, mainNote) {
 		});
 		stem.setX(parent.x); // This is after the x coordinates were set, so we have to set it directly.
 		parent.addRight(stem);
+		stems.push(stem);
 	}
-
+	return stems;
 }
 
 

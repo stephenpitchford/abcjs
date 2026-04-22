@@ -13,6 +13,10 @@ var layoutVoice = function (voice) {
 			}
 		}
 	}
+
+	// Align beams that have the alignbeams flag to the same vertical position.
+	alignBeams(voice.beams);
+
 	voice.staff.specialY.chordLines = setLaneForChord(voice.children);
 
 	// Now we can layout the triplets
@@ -133,5 +137,66 @@ function yAtNote(element, beam) {
 	return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
 }
 
+function alignBeams(beams) {
+	// Collect beams that have alignbeams set, separated by type and stem direction.
+	var graceUp = [];
+	var graceDown = [];
+	var regularUp = [];
+	var regularDown = [];
+	for (var i = 0; i < beams.length; i++) {
+		var beam = beams[i];
+		if (beam.type === 'BeamElem' && beam.alignbeams && beam.beams.length > 0) {
+			if (beam.isgrace) {
+				if (beam.stemsUp) graceUp.push(beam);
+				else graceDown.push(beam);
+			} else {
+				if (beam.stemsUp) regularUp.push(beam);
+				else regularDown.push(beam);
+			}
+		}
+	}
+
+	// Align each group independently.
+	alignBeamGroup(graceUp, true);
+	alignBeamGroup(graceDown, false);
+	alignBeamGroup(regularUp, true);
+	alignBeamGroup(regularDown, false);
+}
+
+function alignBeamGroup(beamGroup, stemsUp) {
+	if (beamGroup.length < 2) return;
+
+	// For stems-up, align to the highest beam position (largest Y).
+	// For stems-down, align to the lowest beam position (smallest Y).
+	var compare = stemsUp ? Math.max : Math.min;
+	var targetY = beamGroup[0].beams[0].startY;
+	for (var i = 1; i < beamGroup.length; i++) {
+		targetY = compare(targetY, beamGroup[i].beams[0].startY);
+	}
+
+	for (i = 0; i < beamGroup.length; i++) {
+		var beam = beamGroup[i];
+		var delta = targetY - beam.beams[0].startY;
+		if (delta === 0) continue;
+
+		// Adjust all beam lines (main beam + additional beams for 16th, 32nd, etc.)
+		for (var b = 0; b < beam.beams.length; b++) {
+			beam.beams[b].startY += delta;
+			beam.beams[b].endY += delta;
+		}
+
+		// Adjust stem endpoints using the stored references.
+		if (beam.createdStems) {
+			for (var s = 0; s < beam.createdStems.length; s++) {
+				var stem = beam.createdStems[s];
+				stem.pitch2 += delta;
+				if (stem.pitch2 > stem.top)
+					stem.top = stem.pitch2;
+				if (stem.pitch2 < stem.bottom)
+					stem.bottom = stem.pitch2;
+			}
+		}
+	}
+}
 
 module.exports = layoutVoice;

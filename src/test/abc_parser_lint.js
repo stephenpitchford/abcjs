@@ -444,6 +444,7 @@ var ParserLint = function() {
 			dynalign: { type: "boolean", optional: true },
 			exprabove: { type: "boolean", optional: true },
 			exprbelow: { type: "boolean", optional: true },
+			alignbeams: { type: "boolean", optional: true },
 			flatbeams: { type: "boolean", optional: true },
 			footer: { type: "string", optional: true },
 			footerfont: fontType,
